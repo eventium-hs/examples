@@ -1,0 +1,24 @@
+-- Canonical, self-contained project: the eventium library is pulled from git.
+--
+-- Prerequisites for this to resolve:
+--   1. eventium-hs/eventium must exist (repo transferred to the org), and
+--   2. that repo must contain committed .cabal files — cabal does not run
+--      hpack on source-repository-packages, so the generated .cabal files must
+--      be tracked in the eventium repo for this pin to build.
+--
+-- For local development against a sibling checkout of eventium, use the
+-- cabal.project.dev project instead (or `just build-local` / `just test`):
+--   cabal build all --project-file=cabal.project.dev
+
+packages:
+  bank
+  cafe
+  counter-cli
+
+source-repository-package
+  type: git
+  location: https://github.com/eventium-hs/eventium.git
+  tag: f4af07ee7aab32ee5238240b1d336d6931cfe7e0
+  subdir: eventium-core eventium-memory eventium-sql-common eventium-sqlite
+
+allow-newer: true

@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout examples
+        uses: actions/checkout@v4
+        with:
+          path: examples
+
+      # The examples build against a sibling checkout of the library, using the
+      # cabal.project.dev project. This keeps CI green without needing the
+      # library published to Hackage.
+      - name: Checkout eventium (sibling)
+        uses: actions/checkout@v4
+        with:
+          repository: eventium-hs/eventium
+          path: eventium
+
+      - uses: cachix/install-nix-action@v30
+        with:
+          nix_path: nixpkgs=channel:nixos-unstable
+
+      - name: Build and test examples
+        working-directory: examples
+        run: |
+          # Build against the sibling ../eventium checkout by making the dev
+          # project the active cabal.project. The committed cabal.project pins
+          # the library via git (source-repository-package), which requires the
+          # library's .cabal files to be committed — not the case yet — so we
+          # avoid it in CI.
+          cp cabal.project.dev cabal.project
+          nix develop --command bash -c '
+            set -e
+            # Generate .cabal files (examples + sibling library) BEFORE any cabal
+            # command reads cabal.project and validates the package directories.
+            just hpack
+            (cd ../eventium && just hpack)
+            cabal update
+            cabal build all
+            cabal test all --test-show-details=direct --enable-tests
+          '

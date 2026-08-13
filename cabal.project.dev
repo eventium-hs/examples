@@ -1,0 +1,23 @@
+-- Local development project: build the examples against a sibling checkout of
+-- the eventium library (../eventium), i.e. the eventium-hs org layout:
+--
+--   eventium-hs/
+--   ├── eventium/    (the library)
+--   └── examples/    (this repo)
+--
+-- Use with:  cabal build all --project-file=cabal.project.dev
+-- (or the `just build-local` / `just test` recipes).
+--
+-- Requires the eventium .cabal files to be generated first — run `just hpack`
+-- in ../eventium (the dev shell does this automatically).
+
+packages:
+  bank
+  cafe
+  counter-cli
+  ../eventium/eventium-core
+  ../eventium/eventium-memory
+  ../eventium/eventium-sql-common
+  ../eventium/eventium-sqlite
+
+allow-newer: true
